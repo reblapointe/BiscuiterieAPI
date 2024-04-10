@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Biscuiterie.Models;
 using Buiscuiterie.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Buiscuiterie.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class BiscuitsController : ControllerBase

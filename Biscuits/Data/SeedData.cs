@@ -4,32 +4,32 @@ using System.Xml.Linq;
 
 namespace Buiscuiterie.Data
 {
-public class SeedData
-{
-    public static async Task Initialize(IServiceProvider serviceProvider)
+    public class SeedData
     {
-        using (var context = new BuiscuiterieContext(
-                serviceProvider.GetRequiredService<DbContextOptions
-                <BuiscuiterieContext>>()))
+        public static async Task Initialize(IServiceProvider serviceProvider)
         {
-            SeedDB(context);
+            using (var context = new BuiscuiterieContext(
+                    serviceProvider.GetRequiredService<DbContextOptions
+                    <BuiscuiterieContext>>()))
+            {
+                SeedDB(context);
+            }
         }
-    }
-    public static void SeedDB(BuiscuiterieContext context)
-    {
-        if (context.Biscuit.Any())
+        public static void SeedDB(BuiscuiterieContext context)
         {
-            return;
+            if (context.Biscuit.Any())
+            {
+                return;
+            }
+            // Ce sont les 5 biscuits préférés de l'équipe RICARDO
+            context.Biscuit.AddRange(
+                new Biscuit { Nom = "Double gingembre", ProprietaireId = "alice" },
+                new Biscuit { Nom = "Brisures de chocolat", ProprietaireId = "alice" },
+                new Biscuit { Nom = "Amaretti", ProprietaireId = "alice" },
+                new Biscuit { Nom = "S'mores au beurre noisette", ProprietaireId = "alice" },
+                new Biscuit { Nom = "Canneberges", ProprietaireId = "alice" });
+            context.SaveChanges();
         }
-        // Ce sont les 5 biscuits préférés de l'équipe RICARDO
-        context.Biscuit.AddRange(
-            new Biscuit { Nom = "Double gingembre" },
-            new Biscuit { Nom = "Brisures de chocolat" },
-            new Biscuit { Nom = "Amaretti" },
-            new Biscuit { Nom = "S'mores au beurre noisette" },
-            new Biscuit { Nom = "Canneberges" });
-        context.SaveChanges();
-    }
 
-}
+    }
 }
