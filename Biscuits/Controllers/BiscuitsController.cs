@@ -8,6 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using Biscuiterie.Models;
 using Buiscuiterie.Data;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
+using Buiscuiterie.Authentification;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Buiscuiterie.Controllers
 {
@@ -31,7 +35,14 @@ namespace Buiscuiterie.Controllers
             {
                 return NotFound();
             }
-            return await _context.Biscuit.ToListAsync();
+
+            if (IsAdmin())
+                return await _context.Biscuit.ToListAsync();
+            var nom = GetUserName();
+            if (nom != null)
+                return await _context.Biscuit.Where(b => b.ProprietaireId == nom).ToListAsync();
+
+            return NotFound();
         }
 
         // GET: api/Biscuits/5
@@ -48,50 +59,59 @@ namespace Buiscuiterie.Controllers
             {
                 return NotFound();
             }
-
+            if (!IsAdmin() && biscuit.ProprietaireId != GetUserName())
+            {
+                return NotFound();
+            }
             return biscuit;
         }
 
         // PUT: api/Biscuits/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBiscuit(int id, Biscuit biscuit)
+        public async Task<IActionResult> PutBiscuit(int id,
+            [Bind(nameof(Biscuit.BiscuitId), nameof(Biscuit.Nom))] Biscuit biscuit)
         {
             if (id != biscuit.BiscuitId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(biscuit).State = EntityState.Modified;
-
-            try
+            var biscuitBD = await _context.Biscuit.FindAsync(id);
+            if (biscuitBD != null && (biscuitBD.ProprietaireId == GetUserName() || IsAdmin()))
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BiscuitExists(id))
+                biscuitBD.Nom = biscuit.Nom;
+                _context.Entry(biscuitBD).State = EntityState.Modified;
+                try
                 {
-                    return NotFound();
+                    await _context.SaveChangesAsync();
                 }
-                else
+                catch (DbUpdateConcurrencyException)
                 {
-                    throw;
+                    if (!BiscuitExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
             }
-
             return NoContent();
         }
 
         // POST: api/Biscuits
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Biscuit>> PostBiscuit(Biscuit biscuit)
+        public async Task<ActionResult<Biscuit>> PostBiscuit([Bind(nameof(Biscuit.Nom))] Biscuit biscuit)
         {
             if (_context.Biscuit == null)
             {
-                return Problem("Entity set 'BuiscuiterieContext.Biscuit'  is null.");
+                return Problem("Entity set 'WebApplication1Context.Biscuit'  is null.");
             }
+
+            biscuit.ProprietaireId = GetUserName();
             _context.Biscuit.Add(biscuit);
             await _context.SaveChangesAsync();
 
@@ -107,7 +127,7 @@ namespace Buiscuiterie.Controllers
                 return NotFound();
             }
             var biscuit = await _context.Biscuit.FindAsync(id);
-            if (biscuit == null)
+            if (biscuit == null || (biscuit.ProprietaireId != GetUserName() && !IsAdmin()))
             {
                 return NotFound();
             }
@@ -121,6 +141,23 @@ namespace Buiscuiterie.Controllers
         private bool BiscuitExists(int id)
         {
             return (_context.Biscuit?.Any(e => e.BiscuitId == id)).GetValueOrDefault();
+        }
+
+        private string? GetUserName()
+        {
+            var currentUser = HttpContext.User;
+            if (currentUser.HasClaim(c => c.Type == ClaimTypes.Name))
+                return currentUser.Claims.First(c => c.Type == ClaimTypes.Name).Value;
+            return null;
+        }
+
+
+        private bool IsAdmin()
+        {
+            var currentUser = HttpContext.User;
+            if (currentUser.HasClaim(c => c.Type == ClaimTypes.Role))
+                return RolesUtilisateur.Administrateur == currentUser.Claims.First(c => c.Type == ClaimTypes.Role).Value;
+            return false;
         }
     }
 }

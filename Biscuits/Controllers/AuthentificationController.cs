@@ -75,7 +75,13 @@ namespace JWTAuthentication.NET6._0.Controllers
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+            if (!await _roleManager.RoleExistsAsync(RolesUtilisateur.Utilisateur))
+                await _roleManager.CreateAsync(new IdentityRole(RolesUtilisateur.Utilisateur));
 
+            if (await _roleManager.RoleExistsAsync(RolesUtilisateur.Utilisateur))
+            {
+                await _userManager.AddToRoleAsync(user, RolesUtilisateur.Utilisateur);
+            }
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
 
@@ -106,7 +112,7 @@ namespace JWTAuthentication.NET6._0.Controllers
             {
                 await _userManager.AddToRoleAsync(user, RolesUtilisateur.Administrateur);
             }
-            if (await _roleManager.RoleExistsAsync(RolesUtilisateur.Administrateur))
+            if (await _roleManager.RoleExistsAsync(RolesUtilisateur.Utilisateur))
             {
                 await _userManager.AddToRoleAsync(user, RolesUtilisateur.Utilisateur);
             }
