@@ -6,14 +6,12 @@ namespace Buiscuiterie.Data
 {
     public class SeedData
     {
-        public static async Task Initialize(IServiceProvider serviceProvider)
+        public static void Initialize(IServiceProvider serviceProvider)
         {
-            using (var context = new BuiscuiterieContext(
+            using var context = new BuiscuiterieContext(
                     serviceProvider.GetRequiredService<DbContextOptions
-                    <BuiscuiterieContext>>()))
-            {
-                SeedDB(context);
-            }
+                    <BuiscuiterieContext>>());
+            SeedDB(context);
         }
         public static void SeedDB(BuiscuiterieContext context)
         {

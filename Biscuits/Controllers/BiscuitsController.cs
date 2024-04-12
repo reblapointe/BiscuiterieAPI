@@ -27,10 +27,10 @@ namespace Buiscuiterie.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Biscuit>>> GetBiscuit()
         {
-          if (_context.Biscuit == null)
-          {
-              return NotFound();
-          }
+            if (_context.Biscuit == null)
+            {
+                return NotFound();
+            }
             return await _context.Biscuit.ToListAsync();
         }
 
@@ -38,10 +38,10 @@ namespace Buiscuiterie.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Biscuit>> GetBiscuit(int id)
         {
-          if (_context.Biscuit == null)
-          {
-              return NotFound();
-          }
+            if (_context.Biscuit == null)
+            {
+                return NotFound();
+            }
             var biscuit = await _context.Biscuit.FindAsync(id);
 
             if (biscuit == null)
@@ -88,10 +88,10 @@ namespace Buiscuiterie.Controllers
         [HttpPost]
         public async Task<ActionResult<Biscuit>> PostBiscuit(Biscuit biscuit)
         {
-          if (_context.Biscuit == null)
-          {
-              return Problem("Entity set 'BuiscuiterieContext.Biscuit'  is null.");
-          }
+            if (_context.Biscuit == null)
+            {
+                return Problem("Entity set 'BuiscuiterieContext.Biscuit'  is null.");
+            }
             _context.Biscuit.Add(biscuit);
             await _context.SaveChangesAsync();
 

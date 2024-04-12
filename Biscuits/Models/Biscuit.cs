@@ -4,6 +4,6 @@
     {
         public int BiscuitId { get; set; }
         public string Nom { get; set; }
-        public string? ProprietaireId { get; set; } 
+        public string? ProprietaireId { get; set; }
     }
 }
