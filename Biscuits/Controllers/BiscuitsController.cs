@@ -9,9 +9,7 @@ using Biscuiterie.Models;
 using Buiscuiterie.Data;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Buiscuiterie.Authentification;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace Buiscuiterie.Controllers
 {
@@ -150,7 +148,6 @@ namespace Buiscuiterie.Controllers
                 return currentUser.Claims.First(c => c.Type == ClaimTypes.Name).Value;
             return null;
         }
-
 
         private bool IsAdmin()
         {
